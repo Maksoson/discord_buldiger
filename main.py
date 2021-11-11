@@ -5,21 +5,28 @@ from config import *
 client = discord.Client()
 
 
-async def task():
-    await client.wait_until_ready()
-    counter = 0
-    channel = discord.Object(id=CHANNEL_ID)
-    while not client.is_closed:
-        counter += 1
-        await client.send_message(channel, counter)
-        await asyncio.sleep(60)
-
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
 
 
-client.loop.create_task(task())
+@client.event
+async def on_member_join(member):
+    for channel in member.server.channels:
+        if str(channel) == "general":
+            await client.send_message(f"""Welcome to the server {member.mention}""")
+
+
+@client.event
+async def on_message(message):
+    id = client.get_guild(CHANNEL_ID)
+    channels = [""]
+
+    if message.content.find("!hello") != -1:
+        await message.channel.send("Hi, " + message.author.id)
+    elif message.content == "!users":
+        await message.channel.send(f"""In {id.name} - {id.member_count} Members\nOwner is {id.owner_id}""")
+
 client.run(TOKEN)
 
 # from discord.ext import commands
